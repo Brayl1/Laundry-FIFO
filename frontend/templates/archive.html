@@ -1,0 +1,31 @@
+{% extends 'base.html' %}{% load ui %}{% block title %}Picked up{% endblock %}{% block breadcrumb %}Picked up{% endblock %}{% block content %}
+<section class="page-heading">
+<div><h1>Picked-up orders</h1><p class="intro">Orders that have left the shop, kept on record. Restore one with its details and notes intact. Restoring does not add it back to the service queue.</p>
+</div>
+</section>
+<section class="surface">
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Updated</th><th>Action</th>
+</tr>
+</thead>
+<tbody>{% for item in items %}
+<tr><td><span class="reference">{{ item.reference }}</span><strong>{{ item.title }}</strong></td><td>{{ item.customer_name|default:'Walk-in' }}</td><td><span class="amount">{{ item.amount_due|peso }}</span></td><td><span class="status {{ item.status }}">{{ item.get_status_display }}</span></td><td>{{ item.updated_at|date:'M j, Y' }}</td><td>{% if can_edit %}
+<form method="post" action="{% url 'workspace:restore_item' item.id %}">{% csrf_token %}<button class="button secondary small" type="submit">Restore order</button>
+</form>
+{% else %}<span class="muted">Read only</span>{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="6">
+<div class="empty-state"><span class="stat-icon blue">{% icon 'archive' %}</span><strong>No picked-up orders yet.</strong><p>Orders you mark as picked up are kept here.</p>
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% include 'includes/pagination.html' %}
+</section>
+{% endblock %}

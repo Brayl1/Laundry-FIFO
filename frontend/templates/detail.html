@@ -1,0 +1,108 @@
+{% extends 'base.html' %}{% load ui %}{% block title %}{{ item.reference }}{% endblock %}{% block breadcrumb %}<a href="{% url 'workspace:board' %}">Orders</a> / {{ item.reference }}{% endblock %}{% block content %}<a class="back-link" href="{% url 'workspace:board' %}">← All orders</a>
+<section class="page-heading">
+<div><p class="eyebrow">{{ item.reference }} <span class="status {{ item.status }}">{{ item.get_status_display }}</span>{% if in_queue %}<span class="soft-label">In service queue</span>{% endif %}</p><h1 class="detail-title">{{ item.title }}</h1><p class="intro">{% if item.customer_name %}For {{ item.customer_name }}. {% endif %}Taken in {{ item.created_at|date:'M j, Y' }} by {{ item.created_by.display_name|default:'System' }}</p>
+</div>
+{% if can_edit %}<a class="button secondary" href="{% url 'workspace:edit' item.id %}">Edit order ↗</a>{% endif %}
+</section>
+<div class="detail-layout">
+<div>
+{% if pickup_message %}
+<section class="surface pickup-card">
+<div class="section-top"><h2>Pickup message</h2><span class="soft-label">Ready to send</span>
+</div>
+<p class="subtle">Copy this text and send it to {{ item.customer_name|default:'the customer' }}{% if item.customer_phone %} at {{ item.customer_phone }}{% endif %}.</p>
+<label class="sr-only" for="pickup-message">Pickup message</label><textarea id="pickup-message" class="pickup-text" rows="4" readonly>{{ pickup_message }}</textarea>
+<button type="button" class="button primary" data-copy="pickup-message">{% icon 'phone' %} Copy message</button>
+</section>
+{% endif %}
+<section class="surface"><h2>Care instructions</h2>
+<div class="prose request-description">{{ item.description|linebreaks|default:'<p>No special instructions.</p>' }}
+</div>
+</section>
+<section class="surface">
+<div class="section-top"><h2>Team notes</h2><span class="count-pill">{{ comments|length }}</span>
+</div>
+{% for comment in comments %}
+<article class="comment"><span class="avatar">{{ comment.author.initial|default:'?' }}</span>
+<div>
+<div class="comment-heading"><strong>{{ comment.author.display_name|default:'Former member' }}</strong><time>{{ comment.created_at|date:'M j, g:i a' }}</time>
+</div>
+<div class="prose">{{ comment.body|linebreaks }}
+</div>
+</div>
+</article>
+{% empty %}<p class="empty-small">Keep context close to the bag. Add the first note, for example a stain you spotted.</p>{% endfor %}{% if can_edit %}
+<form method="post" class="note-form" novalidate>{% csrf_token %}{% include 'includes/form_fields.html' %}<button class="button primary" type="submit">Add note</button>
+</form>
+{% endif %}
+</section>
+<section class="surface"><h2>Order history</h2>{% for event in ticket_events %}
+<div class="event-row"><span class="event-dot"></span>
+<div><p>{{ event.summary }}</p><small>{{ event.actor.display_name|default:'System' }} · {{ event.created_at|date:'M j, g:i a' }}</small>
+</div>
+</div>
+{% empty %}<p class="empty-small">No changes recorded yet.</p>{% endfor %}
+</section>
+</div>
+<aside>
+<section class="surface detail-properties"><h2>Order details</h2>
+<dl>
+<dt>Status
+</dt>
+<dd><span class="status {{ item.status }}">{{ item.get_status_display }}</span>
+</dd>
+<dt>Amount due
+</dt>
+<dd><strong class="amount amount-large">{{ item.amount_due|peso }}</strong>{% if item.weight_kg %}<small class="block-note">{{ item.get_service_type_display }} · {{ item.weight_kg|kilos }}</small>{% else %}<small class="block-note">Add the weight to work out the price.</small>{% endif %}
+</dd>
+<dt>Customer
+</dt>
+<dd>{{ item.customer_name|default:'Walk-in customer' }}
+</dd>
+<dt>Mobile
+</dt>
+<dd>{{ item.customer_phone|default:'Not given' }}
+</dd>
+<dt>Service
+</dt>
+<dd>{{ item.get_service_type_display }}
+</dd>
+<dt>Turnaround
+</dt>
+<dd><span class="priority {{ item.priority }}">{{ item.get_priority_display }}</span>
+</dd>
+<dt>Handled by
+</dt>
+<dd>{{ item.assignee.display_name|default:'Unassigned' }}
+</dd>
+<dt>Load type
+</dt>
+<dd>{{ item.category }}
+</dd>
+<dt>Pickup date
+</dt>
+<dd {% if item.overdue %}class="overdue"{% endif %}>{{ item.due_date|date:'M j, Y'|default:'Not set' }}
+</dd>
+<dt>Customer email
+</dt>
+<dd>{{ item.requester_email|default:'Not given' }}
+</dd>
+<dt>Last updated
+</dt>
+<dd>{{ item.updated_at|timesince }} ago
+</dd>
+</dl>
+{% if can_edit %}
+<form method="post" action="{% url 'workspace:move' item.id %}" class="status-form">{% csrf_token %}<label for="status">Change status</label><select name="status" id="status">{% for key,label in statuses %}<option value="{{ key }}" {% if item.status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="button secondary" type="submit">Update status</button>
+</form>
+{% if item.status == 'todo' and not in_queue %}
+<form method="post" action="{% url 'workspace:queue_join' item.id %}">{% csrf_token %}<button class="button primary full-width" type="submit">Add to service queue</button>
+</form>
+{% endif %}
+<form method="post" action="{% url 'workspace:archive_item' item.id %}" data-confirm="Mark this order as picked up? It moves to the Picked up archive and you can restore it from there.">{% csrf_token %}<button class="button danger-quiet full-width" type="submit">Mark as picked up</button>
+</form>
+{% endif %}
+</section>
+</aside>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block title %}New shop{% endblock %}{% block content %}
+<section class="page-heading">
+<div><h1>Open another laundry shop</h1><p class="intro">Each shop keeps its own orders, queue and workflow in a separate space.</p>
+</div>
+</section>
+<section class="surface narrow">
+<form method="post" novalidate>{% csrf_token %}{% include 'includes/form_fields.html' %}<button class="button primary" type="submit">Create shop</button>
+</form>
+</section>
+{% endblock %}

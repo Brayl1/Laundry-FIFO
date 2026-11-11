@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% load ui %}{% block title %}{% if editing %}Edit order{% else %}New order{% endif %}{% endblock %}{% block breadcrumb %}<a href="{% url 'workspace:board' %}">Orders</a> / {% if editing %}Edit{% else %}New{% endif %}{% endblock %}{% block content %}<a class="back-link" href="{% url 'workspace:board' %}">← Back to orders</a>
+<section class="page-heading">
+<div><h1>{% if editing %}Edit order{% else %}Take in a new order{% endif %}</h1><p class="intro">Write down who the bag belongs to and what it needs. The price is worked out from the weight.</p>
+</div>
+</section>
+<div class="form-layout">
+<section class="surface">
+<form method="post" class="request-form" novalidate>{% csrf_token %}{% include 'includes/form_fields.html' %}
+<div class="form-actions"><a class="button secondary" href="{% url 'workspace:board' %}">Cancel</a><button class="button primary" type="submit">{% if editing %}Save changes{% else %}Save order{% endif %}</button>
+</div>
+</form>
+</section>
+<aside>
+<div class="helper-card"><span class="stat-icon blue">{% icon 'shirt' %}</span><h3>Price per kilogram</h3><p>Wash &amp; fold ₱40 · Wash &amp; dry ₱35 · Dry only ₱20 · Bedding &amp; comforters ₱60. Weigh the dry laundry and the amount due appears on the order.</p><hr><h4>Ready to wash?</h4><p>Save the order as Waiting, then add it to the service queue. Bags are washed in the order they arrive.</p>
+</div>
+{% if editing %}
+<div class="helper-card"><h4>Working together</h4><p>If a teammate changes this order while you edit, Laundry Shop asks you to reload before saving.</p>
+</div>
+{% endif %}
+</aside>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load static ui %}<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f172a"><title>{% block title %}Welcome{% endblock %} · Laundry Shop</title><link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml"><link rel="preload" href="{% static 'fonts/InterVariable.woff2' %}" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="{% static 'app.css' %}"><script src="{% static 'app.js' %}" defer></script></head><body class="auth-page">
+<aside class="auth-story"><a class="brand" href="{% url 'accounts:login' %}"><span class="brand-mark">{% icon 'droplet' %}</span><span class="brand-text">Laundry Shop</span></a>
+<div class="auth-story-body"><span class="pill-light">For laundry shops</span><h1>Fresh, folded<br>and first come,<br><em>first served.</em></h1><p>Follow every bag from drop-off to pickup. One shared line keeps the counter fair and your customers happy.</p>
+<div class="auth-demo" aria-label="How Laundry Shop works">
+<div><span class="demo-dot"></span>One shared service queue<span class="soft-label">Live</span>
+</div>
+<ol>
+<li><span>01</span><strong>Take in the bag</strong><small>Name, weight and price in seconds.</small>
+</li>
+<li><span>02</span><strong>Wash in order</strong><small>The earliest bag is always next.</small>
+</li>
+<li><span>03</span><strong>Ready for pickup</strong><small>Send the customer a message in one click.</small>
+</li>
+</ol>
+</div>
+</div>
+<p class="auth-footer">Less waiting at the counter.</p>
+</aside>
+<main class="auth-main">
+<div class="auth-card">{% for message in messages %}
+<div class="notice {{ message.tags }}" role="status">{{ message }}
+</div>
+{% endfor %}{% block content %}{% endblock %}
+</div>
+<p class="auth-bottom">Laundry Shop · Laundry orders, in order.</p>
+</main>
+</body></html>

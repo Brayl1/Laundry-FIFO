@@ -1,0 +1,41 @@
+{% extends 'base.html' %}{% load ui %}{% block title %}Sales & reports{% endblock %}{% block breadcrumb %}Sales &amp; reports{% endblock %}{% block content %}
+<section class="page-heading">
+<div><h1>Sales &amp; reports</h1><p class="intro">Live numbers from {{ workspace.name }}. Order counts use bags still in the shop; sales also include bags already picked up.</p>
+</div>
+<a class="button secondary" href="{% url 'workspace:export' %}">{% icon 'download' %} Export orders</a>
+</section>
+<section class="surface sales-panel">
+<div class="section-top"><div><h2>Sales by service</h2><p class="subtle">Finished orders only: ready for pickup or already picked up. Amount = kilos × the service's price per kilogram.</p></div><span class="soft-label">{{ finished_count }} order{{ finished_count|pluralize }}</span>
+</div>
+<div class="sales-summary"><div><span>Total sales</span><strong>{{ sales_total|peso }}</strong></div><div><span>Kilos washed</span><strong>{{ kilos_total|kilos }}</strong></div><div><span>Waiting to be washed</span><strong>{{ waiting_kilos|kilos }}</strong></div>
+</div>
+{% for row in sales_rows %}
+<div class="report-bar">
+<div><strong>{{ row.label }}</strong><span>{{ row.orders }} order{{ row.orders|pluralize }} · {{ row.kilos|kilos }} · {{ row.revenue|peso }}</span>
+</div>
+<div class="report-track"><span style="width:{{ row.percentage }}%"></span>
+</div>
+</div>
+{% endfor %}
+</section>
+<section class="stats report-stats"><a href="{% url 'workspace:board' %}"><span>Orders in shop</span><strong>{{ report_total }}</strong><small>Not picked up yet</small></a><a href="{% url 'workspace:board' %}?status=done"><span>Ready for pickup</span><strong>{{ resolution_rate }}<em>%</em></strong><small>{{ resolved_total }} of {{ report_total }} orders are ready</small></a><a href="{% url 'workspace:board' %}?assignee=unassigned"><span>Not handled yet</span><strong>{{ unassigned }}</strong><small>Open orders with no attendant</small></a>
+</section>
+<div class="dashboard-bottom">
+<section class="surface">
+<div class="section-top"><h2>Orders by load type</h2><span class="soft-label">Top 10</span>
+</div>
+{% for row in categories %}
+<div class="report-bar">
+<div><strong>{{ row.category }}</strong><span>{{ row.total }} · {{ row.percentage }}%</span>
+</div>
+<div class="report-track"><span style="width:{{ row.percentage }}%"></span>
+</div>
+</div>
+{% empty %}<p class="empty-small">Take in some orders to see which load types are most common.</p>{% endfor %}
+</section>
+<section class="surface"><h2>Turnaround mix</h2><p class="subtle">How fast customers need their bags back.</p>{% for priority in priorities %}<a href="{% url 'workspace:board' %}?priority={{ priority.key }}" class="priority-report"><span class="priority {{ priority.key }}">{{ priority.label }}</span><strong>{{ priority.count }}</strong><span>View orders →</span></a>{% endfor %}
+<div class="helper-card flat"><h3>Keep pickups moving</h3><p>Hand open orders to an attendant, check bags past their pickup date, and use the service queue to see what is next.</p><a class="text-link" href="{% url 'workspace:board' %}?overdue=1">Review late pickups →</a>
+</div>
+</section>
+</div>
+{% endblock %}

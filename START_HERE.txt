@@ -1,0 +1,29 @@
+SUDS & STATS: LAUNDRY ORDERS, A FAIR SERVICE QUEUE AND A CLEAR WORKFLOW
+
+1. Extract the COMPLETE archive into a NEW folder (do not run it from inside the ZIP).
+2. Windows: double-click SETUP.bat (once), then run START.bat --port 8001
+   macOS/Linux: sh setup.sh, then sh start.sh
+3. Open http://127.0.0.1:8001/ and CREATE YOUR ACCOUNT.
+   Choose a laundry shop name. Sample laundry orders are optional.
+4. Explore Overview, Orders, Service queue, Workflow, Sales & reports, Picked up, Team members.
+5. Open "How it works" to read how the queue and the linked list work.
+
+Python 3.12 or 3.13 recommended; 3.10-3.14 supported.
+First setup needs internet for Django. Keep the terminal open while you use the site.
+There are no default accounts or shared passwords.
+
+DATA STRUCTURES
+  backend/dsa/queue.py                 -> first-in, first-out service queue (a deque)
+  backend/dsa/singly_linked_list.py    -> the laundry workflow, as real linked nodes
+
+FRONTEND: frontend/templates/ + frontend/static/
+BACKEND:  backend/accounts/ + backend/workspace/ + backend/dsa/
+DATABASE: database/models.py + database/migrations/ + database/data/
+
+CHECKS
+  RUN_TESTS.bat        application tests (57)
+  CHECK_QUEUE.bat      FIFO goal tests
+  CHECK_LINKED_LIST.bat   linked list goal tests
+  RUN_ALL_CHECKS.bat   everything together
+
+Read README.md. Production deployment instructions: docs/DEPLOYMENT.md.

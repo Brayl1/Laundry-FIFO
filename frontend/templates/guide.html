@@ -1,0 +1,93 @@
+{% extends 'base.html' %}{% block title %}How it works{% endblock %}{% block breadcrumb %}How it works{% endblock %}
+{% block content %}
+<section class="page-heading">
+<div><h1>How Laundry Shop works</h1><p class="intro">Two pages run on data structures written by hand: the service queue and the laundry workflow. This page explains how, in plain terms.</p>
+</div>
+</section>
+<section class="guide-intro surface"><h2>Who this is for</h2><p>Small laundry shops, self-service laundromats and dormitory laundry rooms where bags are dropped off and collected later. Without a clear line, bags get washed in the wrong order, customers wait longer than they should, and nobody is sure what is ready. Laundry Shop gives the counter one shared line, a price for every bag, and a message to send when the laundry is ready.</p><p>Behind the screens it is a Django website with accounts, roles, shops (workspaces), a database and the two data structures below. Both pages call the real classes in <code>backend/dsa/</code>.</p>
+</section>
+<div class="guide-layout">
+<section class="surface" id="queue-task"><h2>The service queue: first in, first out</h2><p><code>backend/dsa/queue.py</code></p><p>Customers expect fairness: if Ana's bag arrives before Ben's and Carla's, hers is washed first. That rule is called <strong>FIFO</strong>, first in, first out.</p>
+<ol class="instructions">
+<li><strong>enqueue</strong> puts a bag at the rear of the line.
+</li>
+<li><strong>dequeue</strong> removes the bag at the front. This is what <em>Start washing</em> does.
+</li>
+<li><strong>peek</strong> reads the front bag without removing it. This is the <em>Next up</em> card.
+</li>
+<li>The line is stored in a <code>deque</code>, which can add at one end and remove from the other in constant time. A plain list would shift every item on each <code>pop(0)</code>.
+</li>
+</ol>
+<a class="button secondary" href="{% url 'workspace:queue' %}">Open service queue ↗</a>
+</section>
+<section class="surface" id="linked-task"><h2>The workflow: a singly linked list</h2><p><code>backend/dsa/singly_linked_list.py</code></p><p>The steps a bag goes through (Receive, Wash, Dry, Fold) are kept as a chain of nodes. Each node holds one step and a single <code>next</code> pointer to the following node.</p>
+<ol class="instructions">
+<li><code>head</code> is the first node and <code>tail</code> is the last. The last node's <code>next</code> is <code>None</code>.
+</li>
+<li>The list keeps a cached <code>_size</code>, updated after every change.
+</li>
+<li><strong>append</strong> uses <code>tail</code> to add at the end without walking the chain.
+</li>
+<li>Reading or inserting in the middle means following <code>next</code> from <code>head</code>, one node at a time.
+</li>
+<li>The Data structure inspector on the Workflow page draws the real nodes and their links.
+</li>
+</ol>
+<a class="button secondary" href="{% url 'workspace:workflow' %}">Open workflow ↗</a>
+</section>
+</div>
+<section class="surface guide-section"><h2>How fast is each operation?</h2>
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr><th>Operation</th><th>Time</th><th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Queue: enqueue, dequeue, peek, size, is_empty</td><td>O(1)</td><td>The deque works at its two ends and never shifts the other items.</td>
+</tr>
+<tr><td>Linked list: prepend, append, remove_at(0), size, is_empty</td><td>O(1)</td><td><code>head</code>, <code>tail</code> and <code>_size</code> are kept up to date, so no walking is needed.</td>
+</tr>
+<tr><td>Linked list: get, index_of, middle insert, middle remove</td><td>O(n)</td><td>A singly linked list has no index, so it follows <code>next</code> from the head.</td>
+</tr>
+<tr><td>Linked list: remove the last node</td><td>O(n)</td><td>You must find the node before it, and nodes only point forward.</td>
+</tr>
+<tr><td>to_list() and loading a saved snapshot</td><td>O(n)</td><td>Every item is visited once.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A whole web request is not O(1) just because the queue operation is. The request also loads the saved data, saves it again and renders a page.</p>
+</section>
+<section class="guide-section"><h2>Where each layer lives</h2>
+<div class="layer-grid">
+<div><strong>Frontend</strong><code>frontend/templates/</code><code>frontend/static/app.css</code><p>Page layouts, wording, interactions and the phone-friendly styles.</p>
+</div>
+<div><strong>Backend</strong><code>backend/workspace/views.py</code><code>backend/workspace/services.py</code><p>URL handling, validation, calls into the queue and linked list, and database transactions.</p>
+</div>
+<div><strong>Database</strong><code>database/models.py</code><code>database/migrations/</code><p>Django models and SQLite storage. The queue and workflow are saved as lists and rebuilt on each request.</p>
+</div>
+</div>
+</section>
+<section class="surface guide-section"><h2>Checks you can run</h2>
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr><th>Command</th><th>What it checks</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>RUN_TESTS.bat</code></td><td>Pages, forms, saving, roles, shop separation and the real class calls (57 tests)</td>
+</tr>
+<tr><td><code>CHECK_QUEUE.bat</code></td><td>First-in-first-out order, peek, empty cases and the order actually served on the website</td>
+</tr>
+<tr><td><code>CHECK_LINKED_LIST.bat</code></td><td>Every list method, edge cases and the real node links</td>
+</tr>
+<tr><td><code>RUN_ALL_CHECKS.bat</code></td><td>Both of the above together with the application tests</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You can also read the saved state as data at <a href="{% url 'workspace:state_api' %}"><code>/api/state/</code></a>.</p>
+</section>
+{% endblock %}
